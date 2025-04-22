@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide Amsterdam</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #f0f7ff;
+        }
+        .header {
+            background-color: #1e40af;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        .header p {
+            font-size: 0.9rem;
+            color: #bfdbfe;
+        }
+        .nav {
+            background-color: white;
+            padding: 0.75rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .nav button {
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            background-color: #dbeafe;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .nav button.active {
+            background-color: #1e40af;
+            color: white;
+        }
+        .main {
+            padding: 1rem;
+            margin-bottom: 3rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .card h2 {
+            color: #1e40af;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+        .activity {
+            border-left: 4px solid #60a5fa;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .activity-time {
+            display: inline-block;
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+        }
+        .activity-schedule {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+        }
+        .activity-schedule svg {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.25rem;
+        }
+        .activity-description {
+            font-size: 0.95rem;
+            color: #1f2937;
+            line-height: 1.4;
+        }
+        .suggestion-item {
+            border: 1px solid #bfdbfe;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f7ff;
+        }
+        .suggestion-title {
+            font-weight: 600;
+            color: #1e40af;
+        }
+        .suggestion-description {
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            display: none;
+        }
+        .suggestion-description.active {
+            display: block;
+        }
+        .tips-button {
+            display: flex;
+            align-items: center;
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-size: 0.95rem;
+            cursor: pointer;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        .tips-button span {
+            margin-right: 0.5rem;
+        }
+        .tips-button svg {
+            width: 1rem;
+            height: 1rem;
+            transition: transform 0.3s;
+        }
+        .tips-button.active svg {
+            transform: rotate(180deg);
+        }
+        .tips-container {
+            background-color: #eff6ff;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        .tips-container.active {
+            display: block;
+        }
+        .tips-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+        .tips-list {
+            padding-left: 1.5rem;
+        }
+        .tips-list li {
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            color: #1f2937;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #1e3a8a;
+            color: white;
+            text-align: center;
+            padding: 0.75rem;
+            font-size: 0.85rem;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        }
+        .footer p {
+            margin-bottom: 0.25rem;
+        }
+        .footer button {
+            background: none;
+            border: none;
+            color: white;
+            text-decoration: underline;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .map-container {
+            height: 300px;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        .map-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .map-filters button {
+            padding: 0.5rem 0.75rem;
+            border: none;
+            border-radius: 0.25rem;
+            background-color: #dbeafe;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .map-filters button.active {
+            background-color: #1e40af;
+            color: white;
+        }
+        .map-poi {
+            margin-top: 1rem;
+        }
+        .map-poi h3 {
+            font-size: 1rem;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+        .poi-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        .poi-item {
+            display: flex;
+            align-items: center;
+            background-color: #eff6ff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.9rem;
+        }
+        .poi-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            background-color: #1e40af;
+            color: white;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .poi-link {
+            margin-left: auto;
+            color: #2563eb;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+        .poi-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        /* PWA Related Styles */
+        .install-prompt {
+            position: fixed;
+            bottom: 4rem;
+            left: 1rem;
+            right: 1rem;
+            background-color: #1e40af;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 100;
+        }
+        .install-prompt.active {
+            display: block;
+        }
+        .install-prompt p {
+            margin-bottom: 0.5rem;
+        }
+        .install-prompt button {
+            background-color: white;
+            color: #1e40af;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+        .install-prompt button.close {
+            background: none;
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Guide Interactif d'Amsterdam</h1>
+        <p>Votre itinéraire familial sur 3 jours</p>
+    </div>
+    
+    <div class="nav">
+        <div class="nav-container">
+            <button class="tab-btn active" data-tab="jour1">Jour 1</button>
+            <button class="tab-btn" data-tab="jour2">Jour 2</button>
+            <button class="tab-btn" data-tab="jour3">Jour 3</button>
+            <button class="tab-btn" data-tab="suggestions">Suggestions</button>
+            <button class="tab-btn" data-tab="carte">Carte</button>
+        </div>
+    </div>
+    
+    <div class="main">
+        <div id="jour1" class="tab-content active">
+            <div class="card">
+                <h2>Jour 1 : Culture et détente</h2>
+                
+                <div class="activity">
+                    <div class="activity-time">Matin</div>
+                    <div class="activity-title">Rijksmuseum</div>
+                    <div class="activity-schedule">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        9h00–17h00
+                    </div>
+                    <div class="activity-description">
+                        Le plus grand musée d'art des Pays-Bas, célèbre pour ses chefs-d'œuvre de Rembrandt et Vermeer. Activités et jeux de piste pour enfants, prêt de poussettes, vestiaire et espace repas familial
+                    </div>
+                </div>
+                
+                <div class="activity">
+                    <div class="activity-time">Fin de matinée</div>
+                    <div class="activity-title">Vondelpark</div>
+                    <div class="activity-schedule">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Ouvert toute la journée
+                    </div>
+                    <div class="activity-description">
+                        Le plus grand parc d'Amsterdam, idéal pour pique-niquer, se défouler dans les aires de jeux ou se reposer après le musée. Plusieurs cafés avec menus enfants
+                    </div>
+                </div>
+                
+                <div class="activity">
+                    <div class="activity-time">Après-midi</div>
+                    <div class="activity-title">Van Gogh Museum</div>
+                    <div class="activity-schedule">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        9h00–18h00 (vendredi jusqu'à 21h)
+                    </div>
+                    <div class="activity-description">
+                        Collection unique de tableaux de Van Gogh, avec livrets-jeux pour enfants et activités ludiques. Réservation en ligne conseillée
+                    </div>
+                </div>
+                
+                <div class="activity">
+                    <div class="activity-time">Soir</div>
+                    <div class="activity-title">Balade le long des canaux</div>
+                    <div class="activity-description">
+                        Flânez dans le quartier des canaux (classé UNESCO), admirez les maisons typiques et faites quelques photos souvenirs
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="jour2" class="tab-content">
+            <div class="card">
+                <h2>Jour 2 : Sciences, bateaux et vues panoramiques</h2>
+                
+                <div class="activity">
+                    <div class="activity-time">Matin</div>
+                    <div class="activity-title">NEMO Science Museum</div>
+                    <div class="activity-schedule">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        10h00–17h30
+                    </div>
+                    <div class="activity-description">
+                        Musée interactif sur 5 étages, expériences et manipulations pour tous les âges. Sur le toit, terrasse avec vue et jeux d'eau
+                    </div>
+                </div>
+                
+                <div class="activity">
+                    <div class="activity-time">Fin de matinée</div>
+                    <div class="activity-title">Musée Maritime (Scheepvaartmuseum)</div>
+                    <div class="activity-schedule">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        10h00–17h00
+                    </div>
+                    <div class="activity-description">
+                        Découvrez l'histoire maritime néerlandaise et montez à bord d'une immense réplique de navire du XVIIe siècle
+                    </div>
+                </div>
+                
+                <div class="activity">
+                    <div class="activity-time">Déjeuner</div>
+                    <div class="activity-title">Pancakes Amsterdam ou Choco Delight</div>
+                    <div class="activity-description">
+                        Spécialités de pancakes néerlandais, parfait pour les enfants
+                    </div>
+                </div>
+                
+                <div class="activity">
+                    <div class="activity-time">Après-midi</div>
+                    <div class="activity-title">Croisière sur les canaux (Blue Boat Kids Cruise)</div>
+                    <div class="activity-schedule">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Départs réguliers, durée 1h15
+                    </div>
+                    <div class="activity-description">
+                        Croisière familiale avec audioguide pirate pour enfants, jumelles fournies, découverte ludique de la ville depuis l'eau
+                    </div>
+                </div>
+                
+                <div class="activity">
+                    <div class="activity-time">Fin d'après-midi</div>
+                    <div class="activity-title">A'DAM Lookout</div>
+                    <div class="activity-schedule">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        10h00–22h00
+                    </div>
+                    <div class="activity-description">
+                        Plateforme panoramique avec vue à 360°, balançoire géante pour les plus grands (taille minimum 1,20 m), expérience VR, restaurant panoramique
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="jour3" class="tab-content">
+            <div class="card">
+                <h2>Jour 3 : Nature, animaux et quartiers authentiques</h2>
+                
+                <div class="activity">
+                    <div class="activity-time">Matin</div>
+                    <div class="activity-title">ARTIS Zoo</div>
+                    <div class="activity-schedule">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        9h00–17h00
+                    </div>
+                    <div class="activity-description">
+                        L'un des plus anciens zoos d'Europe, planétarium, aquarium, ferme pour enfants, idéal pour petits et grands
+                    </div>
+                </div>
+                
+                <div class="activity">
+                    <div class="activity-time">Fin de matinée</div>
+                    <div class="activity-title">Hortus Botanicus</div>
+                    <div class="activity-schedule">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        10h00–17h00
+                    </div>
+                    <div class="activity-description">
+                        Jardin botanique avec serres tropicales, papillons, activités nature pour enfants
+                    </div>
+                </div>
+                
+                <div class="activity">
+                    <div class="activity-time">Déjeuner</div>
+                    <div class="activity-title">Café Plantage (à côté du zoo)</div>
+                </div>
+                
+                <div class="activity">
+                    <div class="activity-time">Après-midi</div>
+                    <div class="activity-title">Quartier Jordaan & Anne Frank House</div>
+                    <div class="activity-schedule">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        9h00–22h00
+                    </div>
+                    <div class="activity-description">
+                        Balade dans le quartier pittoresque du Jordaan, visite émouvante de la maison d'Anne Frank (à partir de 10 ans conseillé). À réserver à l'avance.
+                    </div>
+                </div>
+                
+                <div class="activity">
+                    <div class="activity-time">Soir</div>
+                    <div class="activity-title">Détente à la plage urbaine de Strand West ou retour au Vondelpark</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="suggestions" class="tab-content">
+            <div class="card">
+                <h2>Suggestions complémentaires</h2>
+                
+                <div class="suggestion-item" data-id="upside">
+                    <div class="suggestion-title">Upside Down Museum</div>
+                    <div class="suggestion-description" id="upside-desc">
+                        Musée interactif pour photos fun (réservation conseillée)
+                    </div>
+                </div>
+                
+                <div class="suggestion-item" data-id="goat">
+                    <div class="suggestion-title">Goat Farm Ridammerhoeve (Amsterdamse Bos)</div>
+                    <div class="suggestion-description" id="goat-desc">
+                        Ferme avec animaux à caresser, jeux et goûter au lait de chèvre
+                    </div>
+                </div>
+                
+                <div class="suggestion-item" data-id="woeste">
+                    <div class="suggestion-title">Nature Playground Het Woeste Westen</div>
+                    <div class="suggestion-description" id="woeste-desc">
+                        Immense aire de jeux nature, idéale pour finir la journée
+                    </div>
+                </div>
+                
+                <button class="tips-button">
+                    <span>Afficher les conseils pratiques</span>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                
+                <div class="tips-container">
+                    <div class="tips-title">Conseils pratiques</div>
+                    <ul class="tips-list">
+                        <li>Réservez les musées et Anne Frank House à l'avance.</li>
+                        <li>Téléchargez la carte interactive sur votre smartphone pour vous repérer facilement.</li>
+                        <li>Privilégiez le vélo ou le tram pour les déplacements en famille.</li>
+                        <li>I Amsterdam City Card : accès gratuit ou à prix réduit à la plupart des musées et transports.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div id="carte" class="tab-content">
+            <div class="card">
+                <h2>Carte des lieux à visiter</h2>
+                
+                <div class="map-filters">
+                    <button class="map-filter-btn active" data-filter="jour1">Jour 1</button>
+                    <button class="map-filter-btn" data-filter="jour2">Jour 2</button>
+                    <button class="map-filter-btn" data-filter="jour3">Jour 3</button>
+                    <button class="map-filter-btn" data-filter="suggestions">Suggestions</button>
+                    <button class="map-filter-btn" data-filter="tous">Tous les lieux</button>
+                </div>
+                
+                <div class="map-container">
+                    <div id="map"></div>
+                </div>
+                
+                <div class="map-poi">
+                    <h3>Points d'intérêt - <span id="poi-title">Jour 1</span></h3>
+                    <div class="poi-list" id="poi-list">
+                        <!-- Will be filled dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Guide familial d'Amsterdam - À emporter partout avec vous ! - by antonello, 2025</p>
+        <button id="save-btn">Enregistrer sur mon appareil</button>
+    </div>
+    
+    <div class="install-prompt" id="install-prompt">
+        <p><strong>Conseil :</strong> Ajoutez cette application à votre écran d'accueil pour y accéder facilement même sans connexion Internet !</p>
+        <div>
+            <button id="install-btn">Installer</button>
+            <button class="close" id="close-prompt-btn">Plus tard</button>
+        </div>
+    </div>
+
+    <script>
+        // Données des lieux
+        const lieux = {
+            jour1: [
+                { nom: "Rijksmuseum", lat: 52.3600, lng: 4.8852 },
+                { nom: "Vondelpark", lat: 52.3579, lng: 4.8686 },
+                { nom: "Van Gogh Museum", lat: 52.3584, lng: 4.8811 },
+                { nom: "Canaux d'Amsterdam", lat: 52.3702, lng: 4.8952 }
+            ],
+            jour2: [
+                { nom: "NEMO Science Museum", lat: 52.3741, lng: 4.9123 },
+                { nom: "Musée Maritime (Scheepvaartmuseum)", lat: 52.3716, lng: 4.9149 },
+                { nom: "Pancakes Amsterdam", lat: 52.3728, lng: 4.8936 },
+                { nom: "Blue Boat (Croisière)", lat: 52.3643, lng: 4.8814 },
+                { nom: "A'DAM Lookout", lat: 52.3844, lng: 4.9019 }
+            ],
+            jour3: [
+                { nom: "ARTIS Zoo", lat: 52.3660, lng: 4.9165 },
+                { nom: "Hortus Botanicus", lat: 52.3669, lng: 4.9083 },
+                { nom: "Café Plantage", lat: 52.3664, lng: 4.9155 },
+                { nom: "Anne Frank House", lat: 52.3752, lng: 4.8840 },
+                { nom: "Strand West", lat: 52.3868, lng: 4.8543 }
+            ],
+            suggestions: [
+                { nom: "Upside Down Museum", lat: 52.3675, lng: 4.9044 },
+                { nom: "Goat Farm Ridammerhoeve", lat: 52.3196, lng: 4.8331 },
+                { nom: "Nature Playground Het Woeste Westen", lat: 52.3752, lng: 4.8170 }
+            ]
+        };
+        
+        // Navigation par onglets
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Retirer la classe active de tous les boutons et contenus
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Ajouter la classe active au bouton cliqué
+                    btn.classList.add('active');
+                    
+                    // Afficher le contenu correspondant
+                    const tabId = btn.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                    document.getElementById(tabId).classList.add('fade-in');
+                    
+                    // Initialiser la carte si on est sur l'onglet carte
+                    if (tabId === 'carte' && !window.mapInitialized) {
+                        initMap();
+                        window.mapInitialized = true;
+                    }
+                });
+            });
+            
+            // Gestion des suggestions
+            const suggestionItems = document.querySelectorAll('.suggestion-item');
+            suggestionItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = item.getAttribute('data-id');
+                    const desc = document.getElementById(`${id}-desc`);
+                    if (desc.classList.contains('active')) {
+                        desc.classList.remove('active');
+                    } else {
+                        document.querySelectorAll('.suggestion-description').forEach(d => {
+                            d.classList.remove('active');
+                        });
+                        desc.classList.add('active');
+                    }
+                });
+            });
+            
+            // Gestion du bouton conseils
+            const tipsBtn = document.querySelector('.tips-button');
+            const tipsContainer = document.querySelector('.tips-container');
+            tipsBtn.addEventListener('click', () => {
+                tipsBtn.classList.toggle('active');
+                tipsContainer.classList.toggle('active');
+                
+                if (tipsBtn.classList.contains('active')) {
+                    tipsBtn.querySelector('span').textContent = 'Masquer les conseils pratiques';
+                } else {
+                    tipsBtn.querySelector('span').textContent = 'Afficher les conseils pratiques';
+                }
+            });
+            
+            // Initialisation de la carte
+            function initMap() {
+                // Créer la carte centrée sur Amsterdam
+                const map = L.map('map').setView([52.3676, 4.9041], 13);
+                
+                // Ajouter la couche OpenStreetMap
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+                
+                // Variables pour la gestion des marqueurs
+                const markers = {};
+                let currentFilter = 'jour1';
+                
+                // Fonction pour afficher les marqueurs
+                function showMarkers(filter) {
+                    // Mettre à jour le titre
+                    document.getElementById('poi-title').textContent = filter === 'tous' ? 'Tous les lieux' : 
+                        filter === 'suggestions' ? 'Suggestions' : 
+                        `Jour ${filter.replace('jour', '')}`;
+                    
+                    // Vider la liste des POI
+                    const poiList = document.getElementById('poi-list');
+                    poiList.innerHTML = '';
+                    
+                    // Supprimer tous les marqueurs existants
+                    if (markers.layer) {
+                        map.removeLayer(markers.layer);
+                    }
+                    
+                    // Créer un groupe de marqueurs
+                    const markersGroup = L.layerGroup();
+                    
+                    // Lieux à afficher
+                    let lieuxToShow = [];
+                    
+                    if (filter === 'tous') {
+                        // Tous les lieux
+                        Object.keys(lieux).forEach(jour => {
+                            lieuxToShow = lieuxToShow.concat(lieux[jour]);
+                        });
+                    } else {
+                        // Lieux d'un jour spécifique
+                        lieuxToShow = lieux[filter];
+                    }
+                    
+                    // Ajouter les marqueurs et les POI
+                    lieuxToShow.forEach((lieu, index) => {
+                        // Créer un marqueur avec popup
+                        const marker = L.marker([lieu.lat, lieu.lng])
+                            .bindPopup(`<b>${lieu.nom}</b>`);
+                        markersGroup.addLayer(marker);
+                        
+                        // Ajouter à la liste des POI
+                        const poiItem = document.createElement('div');
+                        poiItem.className = 'poi-item';
+                        poiItem.innerHTML = `
+                            ${filter !== 'tous' ? `<div class="poi-number">${index + 1}</div>` : ''}
+                            <span>${lieu.nom}</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=${lieu.lat},${lieu.lng}" class="poi-link" target="_blank">
+                                Ouvrir
+                            </a>
+                        `;
+                        poiList.appendChild(poiItem);
+                        
+                        // Cliquer sur un POI fait un zoom sur le lieu
+                        poiItem.addEventListener('click', function(e) {
+                            if (!e.target.classList.contains('poi-link')) {
+                                map.setView([lieu.lat, lieu.lng], 16);
+                                marker.openPopup();
+                            }
+                        });
+                    });
+                    
+                    // Ajouter le groupe au contrôle de couches
+                    markersGroup.addTo(map);
+                    markers.layer = markersGroup;
+                    
+                    // Ajuster la vue pour voir tous les marqueurs
+                    if (lieuxToShow.length > 0) {
+                        const bounds = [];
+                        lieuxToShow.forEach(lieu => {
+                            bounds.push([lieu.lat, lieu.lng]);
+                        });
+                        map.fitBounds(bounds, { padding: [30, 30] });
+                    }
+                }
+                
+                // Gérer les filtres de carte
+                const mapFilterBtns = document.querySelectorAll('.map-filter-btn');
+                mapFilterBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        mapFilterBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        
+                        const filter = btn.getAttribute('data-filter');
+                        currentFilter = filter;
+                        showMarkers(filter);
+                    });
+                });
+                
+                // Afficher les marqueurs initiaux (Jour 1)
+                showMarkers('jour1');
+                
+                // Gérer le redimensionnement
+                window.addEventListener('resize', () => {
+                    map.invalidateSize();
+                });
+            }
+            
+            // Bouton de sauvegarde
+            document.getElementById('save-btn').addEventListener('click', function() {
+                // Simuler une sauvegarde
+                alert('Guide Amsterdam sauvegardé ! Vous pouvez maintenant l\'utiliser hors ligne.');
+                
+                // Montrer le prompt d'installation si c'est un appareil mobile
+                if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                    document.getElementById('install-prompt').classList.add('active');
+                }
+            });
+            
+            // Fermer le prompt d'installation
+            document.getElementById('close-prompt-btn').addEventListener('click', function() {
+                document.getElementById('install-prompt').classList.remove('active');
+            });
+            
+            // Simuler l'installation
+            document.getElementById('install-btn').addEventListener('click', function() {
+                alert('Pour installer cette application sur votre iPhone :\n\n1. Appuyez sur l\'icône de partage (rectangle avec une flèche vers le haut)\n2. Faites défiler et appuyez sur "Sur l\'écran d\'accueil"\n3. Appuyez sur "Ajouter"');
+                document.getElementById('install-prompt').classList.remove('active');
+            });
+            
+            // Vérifier si le site est déjà installé sur l'écran d'accueil
+            if ('standalone' in navigator && navigator.standalone) {
+                // Déjà installé comme PWA
+                document.getElementById('install-prompt').classList.remove('active');
+            } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                // Montrer le prompt d'installation après 5 secondes sur iOS
+                setTimeout(() => {
+                    document.getElementById('install-prompt').classList.add('active');
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
